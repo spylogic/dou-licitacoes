@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Achador de Licitações — DOU Seção 3</title>
+<style>
+  :root {
+    --navy: #0a2547;
+    --navy-2: #13345e;
+    --navy-3: #1b4478;
+    --gold: #c9a227;
+    --gold-light: #e6c25c;
+    --bg: #f4f1e8;
+    --text: #1b2733;
+    --muted: #5b6b7c;
+    --border: #d9d3c0;
+    --ok: #2e7d32;
+    --err: #b3261e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-3) 100%);
+    color: #fff;
+    padding: 28px 32px;
+    border-bottom: 4px solid var(--gold);
+  }
+  header h1 {
+    margin: 0 0 4px 0;
+    font-size: 26px;
+    letter-spacing: 0.5px;
+  }
+  header .sub {
+    color: var(--gold-light);
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+  .painel {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 10px rgba(10, 37, 71, 0.06);
+  }
+  .painel h2 {
+    margin-top: 0;
+    color: var(--navy);
+    font-size: 17px;
+    border-left: 4px solid var(--gold);
+    padding-left: 10px;
+  }
+  .form-linha {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  input[type="date"] {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    min-width: 170px;
+  }
+  .checkbox-linha {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 9px;
+  }
+  .checkbox-linha input { width: 16px; height: 16px; }
+  .checkbox-linha label { margin: 0; font-weight: 500; color: var(--text); }
+  button#btnGerar {
+    background: var(--navy);
+    color: #fff;
+    border: 2px solid var(--gold);
+    padding: 10px 26px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  button#btnGerar:hover:not(:disabled) { background: var(--navy-3); }
+  button#btnGerar:disabled { opacity: 0.6; cursor: wait; }
+  #btnBaixar {
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+  #btnBaixar:hover { background: var(--gold-light); }
+  .status {
+    margin-top: 14px;
+    font-size: 14px;
+  }
+  .status.erro { color: var(--err); font-weight: 600; }
+  .status.carregando { color: var(--muted); }
+  .status.ok { color: var(--ok); font-weight: 600; }
+  #panorama { display: none; }
+  .cards {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .card {
+    background: var(--navy);
+    color: #fff;
+    border-radius: 8px;
+    padding: 14px 20px;
+    min-width: 160px;
+    border-bottom: 3px solid var(--gold);
+  }
+  .card .valor { font-size: 26px; font-weight: 800; color: var(--gold-light); }
+  .card .rotulo { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #dbe4ee; }
+  .duas-colunas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 760px) { .duas-colunas { grid-template-columns: 1fr; } }
+  table.resumo {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.resumo th, table.resumo td {
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  table.resumo th {
+    color: var(--navy);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  #tabelaPreview {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  #tabelaPreview th {
+    background: var(--navy);
+    color: #fff;
+    text-align: left;
+    padding: 8px 10px;
+    position: sticky;
+    top: 0;
+  }
+  #tabelaPreview td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  #tabelaPreview tr:nth-child(even) { background: var(--bg); }
+  .celula-longa {
+    max-width: 320px;
+    max-height: 90px;
+    overflow-y: auto;
+    display: block;
+  }
+  .tabela-wrap {
+    max-height: 560px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  #tabelaPreview { min-width: 900px; }
+  .aviso-truncada {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+    font-style: italic;
+  }
+  a.link-materia { color: var(--navy-3); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Achador de Licitações</h1>
+  <div class="sub">Diário Oficial da União — Seção 3 (Contratos, Editais e Avisos)</div>
+</header>
+
+<main>
+
+  <div class="painel">
+    <h2>Consultar edição</h2>
+    <div class="form-linha">
+      <div>
+        <label for="dataConsulta">Data</label>
+        <input type="date" id="dataConsulta" value="{{ hoje }}" max="{{ hoje }}">
+      </div>
+      <div class="checkbox-linha">
+        <input type="checkbox" id="soLicitacao">
+        <label for="soLicitacao">Somente itens de licitação (pregão, dispensa, edital de licitação etc.)</label>
+      </div>
+      <div>
+        <button id="btnGerar" onclick="gerar()">GERAR</button>
+      </div>
+    </div>
+    <div id="status" class="status"></div>
+  </div>
+
+  <div class="painel" id="panorama">
+    <h2>Panorama do dia</h2>
+    <div class="cards" id="cards"></div>
+
+    <div class="duas-colunas">
+      <div>
+        <h3 style="color:var(--navy); font-size:14px;">Por tipo de ato</h3>
+        <table class="resumo" id="tabelaTipos"></table>
+      </div>
+      <div>
+        <h3 style="color:var(--navy); font-size:14px;">Por órgão principal (top 10)</h3>
+        <table class="resumo" id="tabelaOrgaos"></table>
+      </div>
+    </div>
+
+    <div style="margin-top:18px;">
+      <a id="btnBaixar" href="/api/download">⬇ BAIXAR EXCEL (.xlsx)</a>
+    </div>
+  </div>
+
+  <div class="painel" id="painelPreview" style="display:none;">
+    <h2>Prévia da relação</h2>
+    <div class="tabela-wrap">
+      <table id="tabelaPreview">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Título</th>
+            <th>Objeto</th>
+            <th>Resumo breve</th>
+            <th>Órgão</th>
+            <th>Tipo</th>
+          </tr>
+        </thead>
+        <tbody id="corpoPreview"></tbody>
+      </table>
+    </div>
+    <div id="avisoTruncada" class="aviso-truncada"></div>
+  </div>
+
+</main>
+
+<script>
+function escapeHtml(texto) {
+  if (texto === null || texto === undefined) return "";
+  return String(texto)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+async function gerar() {
+  const data = document.getElementById("dataConsulta").value;
+  const soLicitacao = document.getElementById("soLicitacao").checked;
+  const status = document.getElementById("status");
+  const btn = document.getElementById("btnGerar");
+  const panorama = document.getElementById("panorama");
+  const painelPreview = document.getElementById("painelPreview");
+
+  if (!data) {
+    status.className = "status erro";
+    status.textContent = "Selecione uma data.";
+    return;
+  }
+
+  btn.disabled = true;
+  panorama.style.display = "none";
+  painelPreview.style.display = "none";
+  status.className = "status carregando";
+  status.textContent = "Consultando o Diário Oficial da União... isso pode levar alguns segundos.";
+
+  try {
+    const resp = await fetch("/api/gerar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: data, so_licitacao: soLicitacao }),
+    });
+    const json = await resp.json();
+
+    if (!resp.ok) {
+      status.className = "status erro";
+      status.textContent = json.erro || "Erro ao consultar o DOU.";
+      return;
+    }
+
+    status.className = "status ok";
+    status.textContent = `Pronto! ${json.total} matéria(s) encontrada(s) para ${json.data}` +
+      (json.so_licitacao ? " (filtro: somente licitação)." : ".");
+
+    montarPanorama(json);
+    montarPreview(json);
+
+  } catch (e) {
+    status.className = "status erro";
+    status.textContent = "Erro inesperado: " + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function montarPanorama(json) {
+  const panorama = document.getElementById("panorama");
+  const cards = document.getElementById("cards");
+  cards.innerHTML = `
+    <div class="card"><div class="valor">${json.total}</div><div class="rotulo">Matérias encontradas</div></div>
+    <div class="card"><div class="valor">${json.data}</div><div class="rotulo">Data consultada</div></div>
+    <div class="card"><div class="valor">${json.contagem_tipo.length}</div><div class="rotulo">Tipos de ato distintos</div></div>
+  `;
+
+  const tabelaTipos = document.getElementById("tabelaTipos");
+  tabelaTipos.innerHTML = "<tr><th>Tipo</th><th>Qtd.</th></tr>" +
+    json.contagem_tipo.map(([tipo, qtd]) => `<tr><td>${escapeHtml(tipo)}</td><td>${qtd}</td></tr>`).join("");
+
+  const tabelaOrgaos = document.getElementById("tabelaOrgaos");
+  tabelaOrgaos.innerHTML = "<tr><th>Órgão</th><th>Qtd.</th></tr>" +
+    json.contagem_orgao.map(([orgao, qtd]) => `<tr><td>${escapeHtml(orgao)}</td><td>${qtd}</td></tr>`).join("");
+
+  panorama.style.display = "block";
+}
+
+function montarPreview(json) {
+  const painelPreview = document.getElementById("painelPreview");
+  const corpo = document.getElementById("corpoPreview");
+  const aviso = document.getElementById("avisoTruncada");
+
+  if (json.preview.length === 0) {
+    corpo.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted);">Nenhuma matéria encontrada para esta data/filtro.</td></tr>`;
+  } else {
+    corpo.innerHTML = json.preview.map(m => `
+      <tr>
+        <td>${escapeHtml(m.data)}</td>
+        <td><span class="celula-longa">${m.url ? `<a class="link-materia" href="${escapeHtml(m.url)}" target="_blank" rel="noopener">${escapeHtml(m.titulo)}</a>` : escapeHtml(m.titulo)}</span></td>
+        <td><span class="celula-longa">${escapeHtml(m.objeto)}</span></td>
+        <td><span class="celula-longa">${escapeHtml(m.resumo_breve)}</span></td>
+        <td><span class="celula-longa">${escapeHtml(m.orgao)}</span></td>
+        <td>${escapeHtml(m.tipo_ato)}</td>
+      </tr>
+    `).join("");
+  }
+
+  aviso.textContent = json.preview_truncada
+    ? `Mostrando os primeiros ${json.preview.length} itens. Baixe o Excel para ver a relação completa.`
+    : "";
+
+  painelPreview.style.display = "block";
+}
+</script>
+
+</body>
+</html>
