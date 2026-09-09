@@ -30,6 +30,11 @@
     color: #fff;
     padding: 28px 32px;
     border-bottom: 4px solid var(--gold);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
   }
   header h1 { margin: 0 0 4px 0; font-size: 26px; letter-spacing: 0.5px; }
   header .sub {
@@ -38,6 +43,23 @@
     letter-spacing: 1px;
     text-transform: uppercase;
   }
+  #infoUsuario {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    color: #dbe4ee;
+    font-size: 13px;
+  }
+  #btnSair {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.5);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  #btnSair:hover { background: rgba(255,255,255,0.12); }
   main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
   .painel {
     background: #fff;
@@ -124,16 +146,125 @@
   .tabela-wrap { max-height: 560px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
   #tabelaPreview { min-width: 900px; }
   a.link-materia { color: var(--navy-3); font-weight: 600; }
+
+  /* Tela de login */
+  #telaLogin {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-3) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+  }
+  .caixa-login {
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px 30px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+  }
+  .caixa-login h1 {
+    margin: 0 0 4px 0;
+    font-size: 20px;
+    color: var(--navy);
+  }
+  .caixa-login .sub-login {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .campo-login { margin-bottom: 14px; }
+  .campo-login label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .campo-login input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  #btnEntrar {
+    width: 100%;
+    background: var(--navy);
+    color: #fff;
+    border: 2px solid var(--gold);
+    padding: 10px 0;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  #btnEntrar:hover:not(:disabled) { background: var(--navy-3); }
+  #btnEntrar:disabled { opacity: 0.6; cursor: wait; }
+  #statusLogin {
+    margin-top: 12px;
+    font-size: 13px;
+    min-height: 18px;
+  }
+  #statusLogin.erro { color: var(--err); font-weight: 600; }
+  #statusLogin.info { color: var(--muted); }
+  .aviso-login {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 18px;
+    line-height: 1.5;
+    border-top: 1px dashed var(--border);
+    padding-top: 12px;
+  }
 </style>
 </head>
 <body>
 
+<div id="telaLogin">
+  <div class="caixa-login">
+    <h1>Achador de Licitações</h1>
+    <div class="sub-login">Acesso restrito — informe usuário e senha</div>
+    <form id="formLogin" onsubmit="return fazerLogin(event)">
+      <div class="campo-login">
+        <label for="campoUsuario">Usuário</label>
+        <input type="text" id="campoUsuario" autocomplete="username" autofocus>
+      </div>
+      <div class="campo-login">
+        <label for="campoSenha">Senha</label>
+        <input type="password" id="campoSenha" autocomplete="current-password">
+      </div>
+      <button id="btnEntrar" type="submit">ENTRAR</button>
+      <div id="statusLogin" class="status info"></div>
+    </form>
+    <div class="aviso-login">
+      Os usuários ficam na planilha <code>docs/usuarios/usuarios.xlsx</code>
+      deste repositório. Para adicionar, remover ou trocar uma senha, edite
+      essa planilha direto no GitHub (colunas <code>login</code> e
+      <code>senha</code>) e faça commit — não precisa mexer em mais nada.
+      Esta é apenas uma barreira simples: como o site é público, alguém com
+      conhecimento técnico pode contornar esta tela ou baixar a planilha.
+      Não use senhas sensíveis nem dados verdadeiramente confidenciais aqui.
+    </div>
+  </div>
+</div>
+
 <header>
-  <h1>Achador de Licitações</h1>
-  <div class="sub">Diário Oficial da União — Seção 3 (Contratos, Editais e Avisos)</div>
+  <div>
+    <h1>Achador de Licitações</h1>
+    <div class="sub">Diário Oficial da União — Seção 3 (Contratos, Editais e Avisos)</div>
+  </div>
+  <div id="infoUsuario">
+    <span id="nomeUsuarioLogado"></span>
+    <button id="btnSair" onclick="sair()">Sair</button>
+  </div>
 </header>
 
-<main>
+<main id="conteudoPrincipal" style="display:none;">
 
   <div class="painel">
     <h2>Consultas já geradas</h2>
@@ -200,6 +331,7 @@
 
 </main>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // ------------------------------------------------------------------
 // Ajuste aqui o "usuario/repositorio" do GitHub uma vez, após criar o
@@ -209,10 +341,95 @@ const REPO_GITHUB = "spylogic/dou-licitacoes";
 
 document.getElementById("linkActions").href = `https://github.com/${REPO_GITHUB}/actions/workflows/gerar-dou.yml`;
 
+const CHAVE_SESSAO = "dou_usuario_logado";
+
 function escapeHtml(texto) {
   if (texto === null || texto === undefined) return "";
   return String(texto).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
+
+// --------------------------- LOGIN ---------------------------
+
+async function carregarUsuarios() {
+  const resp = await fetch("usuarios/usuarios.xlsx", { cache: "no-store" });
+  if (!resp.ok) throw new Error("Não foi possível carregar a planilha de usuários.");
+  const buffer = await resp.arrayBuffer();
+  const wb = XLSX.read(buffer, { type: "array" });
+  const primeiraAba = wb.Sheets[wb.SheetNames[0]];
+  const linhas = XLSX.utils.sheet_to_json(primeiraAba, { defval: "" });
+  return linhas.map((linha) => {
+    const chaves = Object.keys(linha);
+    const chaveLogin = chaves.find((k) => k.trim().toLowerCase() === "login") || chaves[0];
+    const chaveSenha = chaves.find((k) => k.trim().toLowerCase() === "senha") || chaves[1];
+    return {
+      login: String(linha[chaveLogin] ?? "").trim(),
+      senha: String(linha[chaveSenha] ?? "").trim(),
+    };
+  });
+}
+
+async function fazerLogin(evento) {
+  evento.preventDefault();
+  const usuario = document.getElementById("campoUsuario").value.trim();
+  const senha = document.getElementById("campoSenha").value;
+  const btn = document.getElementById("btnEntrar");
+  const status = document.getElementById("statusLogin");
+
+  if (!usuario || !senha) {
+    status.className = "erro";
+    status.textContent = "Informe usuário e senha.";
+    return false;
+  }
+
+  btn.disabled = true;
+  status.className = "info";
+  status.textContent = "Verificando...";
+
+  try {
+    const usuarios = await carregarUsuarios();
+    const encontrado = usuarios.find(
+      (u) => u.login.toLowerCase() === usuario.toLowerCase() && u.senha === senha
+    );
+
+    if (!encontrado) {
+      status.className = "erro";
+      status.textContent = "Usuário ou senha inválidos.";
+      btn.disabled = false;
+      return false;
+    }
+
+    sessionStorage.setItem(CHAVE_SESSAO, encontrado.login);
+    entrarNoSite(encontrado.login);
+  } catch (e) {
+    status.className = "erro";
+    status.textContent = "Erro ao verificar login: " + e.message;
+    btn.disabled = false;
+  }
+  return false;
+}
+
+function entrarNoSite(login) {
+  document.getElementById("telaLogin").style.display = "none";
+  document.getElementById("conteudoPrincipal").style.display = "block";
+  const infoUsuario = document.getElementById("infoUsuario");
+  infoUsuario.style.display = "flex";
+  document.getElementById("nomeUsuarioLogado").textContent = `Olá, ${login}`;
+  carregarIndice();
+}
+
+function sair() {
+  sessionStorage.removeItem(CHAVE_SESSAO);
+  location.reload();
+}
+
+function verificarSessao() {
+  const login = sessionStorage.getItem(CHAVE_SESSAO);
+  if (login) {
+    entrarNoSite(login);
+  }
+}
+
+// --------------------------- CONSULTAS ---------------------------
 
 let indice = [];
 
@@ -314,7 +531,7 @@ function montarPreview(json) {
   painelPreview.style.display = "block";
 }
 
-carregarIndice();
+verificarSessao();
 </script>
 
 </body>
