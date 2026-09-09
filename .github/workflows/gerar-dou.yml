@@ -1,0 +1,80 @@
+name: Gerar Consulta DOU
+
+# Este workflow é o "servidor" do Achador de Licitações no modelo 100% GitHub:
+# ele roda a consulta ao Diário Oficial da União e salva os resultados como
+# arquivos estáticos em docs/dados/, que o GitHub Pages serve diretamente.
+#
+# Duas formas de disparar:
+#   1) Manual (qualquer data, inclusive passada): aba "Actions" do repositório
+#      no GitHub -> "Gerar Consulta DOU" -> "Run workflow" -> informe a data.
+#   2) Automática: todo dia útil às 09h05 (horário de Brasília), gera a
+#      consulta do próprio dia sozinho.
+
+on:
+  workflow_dispatch:
+    inputs:
+      data:
+        description: "Data a consultar (AAAA-MM-DD). Deixe em branco para usar a data de hoje."
+        required: false
+        type: string
+      so_licitacao:
+        description: "Filtrar somente itens de licitação?"
+        required: false
+        type: boolean
+        default: false
+  schedule:
+    # 09:05 no horário de Brasília (UTC-3) = 12:05 UTC, de segunda a sexta.
+    - cron: "5 12 * * 1-5"
+
+permissions:
+  contents: write
+
+jobs:
+  gerar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Determinar a data a consultar
+        id: data
+        run: |
+          if [ -n "${{ inputs.data }}" ]; then
+            echo "valor=${{ inputs.data }}" >> "$GITHUB_OUTPUT"
+          else
+            # Sem data informada (ex.: execução agendada): usa "hoje" no
+            # horário de Brasília, para não pegar o dia errado por causa
+            # do fuso do servidor do GitHub (que roda em UTC).
+            echo "valor=$(TZ='America/Sao_Paulo' date +%F)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Gerar dados do DOU
+        env:
+          DATA_CONSULTA: ${{ steps.data.outputs.valor }}
+          SO_LICITACAO: ${{ inputs.so_licitacao }}
+        run: |
+          if [ "$SO_LICITACAO" = "true" ]; then
+            python scripts/gerar_estatico.py "$DATA_CONSULTA" --so-licitacao
+          else
+            python scripts/gerar_estatico.py "$DATA_CONSULTA"
+          fi
+
+      - name: Publicar resultado no repositório
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/dados
+          if git diff --staged --quiet; then
+            echo "Nada de novo para publicar (sem matérias ou dados já existentes)."
+          else
+            git commit -m "Atualiza dados do DOU (${{ steps.data.outputs.valor }})"
+            git push
+          fi
