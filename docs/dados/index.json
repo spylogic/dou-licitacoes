@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "data_iso": "2026-09-09",
+    "data": "09/09/2026",
+    "so_licitacao": false,
+    "total": 1941,
+    "arquivo_json": "2026-09-09.json",
+    "arquivo_xlsx": "2026-09-09.xlsx",
+    "gerado_em": "2026-09-09T14:59:15.797656+00:00"
+  }
+]
