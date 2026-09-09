@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Achador de Licitações — DOU Seção 3</title>
+<style>
+  :root {
+    --navy: #0a2547;
+    --navy-2: #13345e;
+    --navy-3: #1b4478;
+    --gold: #c9a227;
+    --gold-light: #e6c25c;
+    --bg: #f4f1e8;
+    --text: #1b2733;
+    --muted: #5b6b7c;
+    --border: #d9d3c0;
+    --ok: #2e7d32;
+    --err: #b3261e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-3) 100%);
+    color: #fff;
+    padding: 28px 32px;
+    border-bottom: 4px solid var(--gold);
+  }
+  header h1 { margin: 0 0 4px 0; font-size: 26px; letter-spacing: 0.5px; }
+  header .sub {
+    color: var(--gold-light);
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+  .painel {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 10px rgba(10, 37, 71, 0.06);
+  }
+  .painel h2 {
+    margin-top: 0;
+    color: var(--navy);
+    font-size: 17px;
+    border-left: 4px solid var(--gold);
+    padding-left: 10px;
+  }
+  .form-linha { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  select {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    min-width: 260px;
+    background: #fff;
+  }
+  .status { margin-top: 14px; font-size: 14px; }
+  .status.erro { color: var(--err); font-weight: 600; }
+  .status.ok { color: var(--ok); font-weight: 600; }
+  .status.info { color: var(--muted); }
+  .caixa-instrucoes {
+    background: var(--bg);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 16px;
+    line-height: 1.6;
+  }
+  .caixa-instrucoes b { color: var(--navy); }
+  .caixa-instrucoes a { color: var(--navy-3); font-weight: 600; }
+  code {
+    background: #eee;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  #panorama { display: none; }
+  .cards { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+  .card {
+    background: var(--navy);
+    color: #fff;
+    border-radius: 8px;
+    padding: 14px 20px;
+    min-width: 160px;
+    border-bottom: 3px solid var(--gold);
+  }
+  .card .valor { font-size: 26px; font-weight: 800; color: var(--gold-light); }
+  .card .rotulo { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #dbe4ee; }
+  .duas-colunas { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .duas-colunas { grid-template-columns: 1fr; } }
+  table.resumo { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.resumo th, table.resumo td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  table.resumo th { color: var(--navy); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  #btnBaixar {
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+  #btnBaixar:hover { background: var(--gold-light); }
+  #tabelaPreview { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+  #tabelaPreview th { background: var(--navy); color: #fff; text-align: left; padding: 8px 10px; position: sticky; top: 0; }
+  #tabelaPreview td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  #tabelaPreview tr:nth-child(even) { background: var(--bg); }
+  .celula-longa { max-width: 320px; max-height: 90px; overflow-y: auto; display: block; }
+  .tabela-wrap { max-height: 560px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+  #tabelaPreview { min-width: 900px; }
+  a.link-materia { color: var(--navy-3); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Achador de Licitações</h1>
+  <div class="sub">Diário Oficial da União — Seção 3 (Contratos, Editais e Avisos)</div>
+</header>
+
+<main>
+
+  <div class="painel">
+    <h2>Consultas já geradas</h2>
+    <div class="form-linha">
+      <div>
+        <label for="seletorData">Escolha uma data</label>
+        <select id="seletorData" onchange="mostrarConsulta()">
+          <option value="">Carregando...</option>
+        </select>
+      </div>
+    </div>
+    <div id="status" class="status info"></div>
+
+    <div class="caixa-instrucoes">
+      <b>Esta página é 100% estática (GitHub Pages)</b> — ela só mostra
+      consultas que já foram geradas. Não há um botão "GERAR" aqui, porque
+      quem busca os dados no Diário Oficial é o <b>GitHub Actions</b>, não o
+      seu navegador.<br><br>
+      <b>Para gerar (ou atualizar) uma data que ainda não está na lista:</b>
+      abra a aba <b>Actions</b> deste repositório no GitHub → escolha o
+      workflow <b>"Gerar Consulta DOU"</b> → clique em <b>"Run workflow"</b> →
+      informe a data no formato <code>AAAA-MM-DD</code> (ou deixe em branco
+      para usar hoje) → aguarde cerca de 1 minuto. Quando terminar, recarregue
+      esta página: a nova data vai aparecer na lista acima.<br><br>
+      Todo dia útil, às 9h05 (horário de Brasília), o workflow também roda
+      sozinho e gera a consulta do dia automaticamente.<br><br>
+      <a id="linkActions" href="#" target="_blank" rel="noopener">Abrir a aba Actions do repositório →</a>
+    </div>
+  </div>
+
+  <div class="painel" id="panorama">
+    <h2>Panorama do dia</h2>
+    <div class="cards" id="cards"></div>
+
+    <div class="duas-colunas">
+      <div>
+        <h3 style="color:var(--navy); font-size:14px;">Por tipo de ato</h3>
+        <table class="resumo" id="tabelaTipos"></table>
+      </div>
+      <div>
+        <h3 style="color:var(--navy); font-size:14px;">Por órgão principal (top 10)</h3>
+        <table class="resumo" id="tabelaOrgaos"></table>
+      </div>
+    </div>
+
+    <div style="margin-top:18px;">
+      <a id="btnBaixar" href="#">⬇ BAIXAR EXCEL (.xlsx)</a>
+    </div>
+  </div>
+
+  <div class="painel" id="painelPreview" style="display:none;">
+    <h2>Relação completa</h2>
+    <div class="tabela-wrap">
+      <table id="tabelaPreview">
+        <thead>
+          <tr>
+            <th>Data</th><th>Título</th><th>Objeto</th><th>Resumo breve</th><th>Órgão</th><th>Tipo</th>
+          </tr>
+        </thead>
+        <tbody id="corpoPreview"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ------------------------------------------------------------------
+// Ajuste aqui o "usuario/repositorio" do GitHub uma vez, após criar o
+// repositório e ativar o GitHub Pages. Não precisa mexer em mais nada.
+// ------------------------------------------------------------------
+const REPO_GITHUB = "spylogic/dou-licitacoes";
+
+document.getElementById("linkActions").href = `https://github.com/${REPO_GITHUB}/actions/workflows/gerar-dou.yml`;
+
+function escapeHtml(texto) {
+  if (texto === null || texto === undefined) return "";
+  return String(texto).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+let indice = [];
+
+async function carregarIndice() {
+  const status = document.getElementById("status");
+  const seletor = document.getElementById("seletorData");
+  try {
+    const resp = await fetch("dados/index.json", { cache: "no-store" });
+    if (!resp.ok) throw new Error("index.json não encontrado");
+    indice = await resp.json();
+  } catch (e) {
+    indice = [];
+  }
+
+  if (indice.length === 0) {
+    seletor.innerHTML = `<option value="">Nenhuma consulta gerada ainda</option>`;
+    status.className = "status info";
+    status.textContent = "Ainda não há nenhuma consulta gerada. Use a aba Actions do GitHub para gerar a primeira (veja as instruções abaixo).";
+    return;
+  }
+
+  seletor.innerHTML = indice.map((item, i) => {
+    const rotulo = `${item.data}${item.so_licitacao ? " — somente licitação" : ""} (${item.total} matéria${item.total === 1 ? "" : "s"})`;
+    return `<option value="${i}">${escapeHtml(rotulo)}</option>`;
+  }).join("");
+
+  status.className = "status info";
+  status.textContent = `${indice.length} consulta(s) disponível(is).`;
+
+  mostrarConsulta();
+}
+
+async function mostrarConsulta() {
+  const seletor = document.getElementById("seletorData");
+  const status = document.getElementById("status");
+  const idx = seletor.value;
+  const panorama = document.getElementById("panorama");
+  const painelPreview = document.getElementById("painelPreview");
+
+  if (idx === "" || !indice[idx]) {
+    panorama.style.display = "none";
+    painelPreview.style.display = "none";
+    return;
+  }
+
+  const item = indice[idx];
+
+  try {
+    const resp = await fetch(`dados/${item.arquivo_json}`, { cache: "no-store" });
+    if (!resp.ok) throw new Error("Arquivo de dados não encontrado.");
+    const json = await resp.json();
+
+    document.getElementById("btnBaixar").href = `dados/${item.arquivo_xlsx}`;
+    document.getElementById("btnBaixar").setAttribute("download", item.arquivo_xlsx);
+
+    montarPanorama(json);
+    montarPreview(json);
+
+    status.className = "status ok";
+    status.textContent = `${json.total} matéria(s) em ${json.data}` + (json.so_licitacao ? " (somente licitação)." : ".");
+  } catch (e) {
+    status.className = "status erro";
+    status.textContent = "Erro ao carregar os dados desta consulta: " + e.message;
+  }
+}
+
+function montarPanorama(json) {
+  const panorama = document.getElementById("panorama");
+  document.getElementById("cards").innerHTML = `
+    <div class="card"><div class="valor">${json.total}</div><div class="rotulo">Matérias encontradas</div></div>
+    <div class="card"><div class="valor">${json.data}</div><div class="rotulo">Data consultada</div></div>
+    <div class="card"><div class="valor">${json.contagem_tipo.length}</div><div class="rotulo">Tipos de ato distintos</div></div>
+  `;
+  document.getElementById("tabelaTipos").innerHTML = "<tr><th>Tipo</th><th>Qtd.</th></tr>" +
+    json.contagem_tipo.map(([tipo, qtd]) => `<tr><td>${escapeHtml(tipo)}</td><td>${qtd}</td></tr>`).join("");
+  document.getElementById("tabelaOrgaos").innerHTML = "<tr><th>Órgão</th><th>Qtd.</th></tr>" +
+    json.contagem_orgao.map(([orgao, qtd]) => `<tr><td>${escapeHtml(orgao)}</td><td>${qtd}</td></tr>`).join("");
+  panorama.style.display = "block";
+}
+
+function montarPreview(json) {
+  const painelPreview = document.getElementById("painelPreview");
+  const corpo = document.getElementById("corpoPreview");
+
+  if (json.preview.length === 0) {
+    corpo.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted);">Nenhuma matéria encontrada para esta data/filtro.</td></tr>`;
+  } else {
+    corpo.innerHTML = json.preview.map(m => `
+      <tr>
+        <td>${escapeHtml(m.data)}</td>
+        <td><span class="celula-longa">${m.url ? `<a class="link-materia" href="${escapeHtml(m.url)}" target="_blank" rel="noopener">${escapeHtml(m.titulo)}</a>` : escapeHtml(m.titulo)}</span></td>
+        <td><span class="celula-longa">${escapeHtml(m.objeto)}</span></td>
+        <td><span class="celula-longa">${escapeHtml(m.resumo_breve)}</span></td>
+        <td><span class="celula-longa">${escapeHtml(m.orgao)}</span></td>
+        <td>${escapeHtml(m.tipo_ato)}</td>
+      </tr>
+    `).join("");
+  }
+  painelPreview.style.display = "block";
+}
+
+carregarIndice();
+</script>
+
+</body>
+</html>
