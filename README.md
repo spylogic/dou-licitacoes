@@ -80,6 +80,38 @@ sem precisar fazer nada.
   `index.json` para montar a lista de datas disponíveis e, ao escolher
   uma, busca o `.json` correspondente para montar o panorama e a prévia,
   além de linkar o `.xlsx` para download.
+- `docs/usuarios/usuarios.xlsx` — planilha com os usuários que podem
+  entrar no site (ver seção "Login" abaixo).
+
+### Login (acesso restrito)
+
+O site pede usuário e senha antes de mostrar qualquer conteúdo. As
+credenciais válidas ficam na planilha `docs/usuarios/usuarios.xlsx`, com
+duas colunas: `login` e `senha`. O usuário inicial já vem cadastrado:
+
+| login | senha |
+|-------|-------|
+| admin | admin |
+
+**Para adicionar, remover ou trocar a senha de um usuário:** abra
+`docs/usuarios/usuarios.xlsx` direto no GitHub (ou baixe, edite no Excel
+e suba de novo), adicione/edite as linhas e faça commit. Não precisa
+mexer em nenhum outro arquivo — na próxima vez que alguém carregar o
+site, a planilha atualizada já vale.
+
+**Importante — isso não é segurança de verdade.** O site é 100%
+estático e público (GitHub Pages não roda nenhum código no servidor), e
+a checagem de usuário/senha é feita inteiramente no navegador: a
+planilha com as senhas é um arquivo público do repositório, que
+qualquer pessoa pode baixar diretamente pela URL, e uma pessoa com
+conhecimento técnico pode abrir o "Inspecionar" do navegador e pular a
+tela de login sem nem precisar da senha. Trate essa tela como uma
+cortina simples para o link não ficar "escancarado" para qualquer
+visitante casual — troque a senha padrão `admin`/`admin`, mas não
+guarde aqui senhas que você usa em outros lugares nem dados realmente
+sigilosos. Se um dia precisar de login de verdade (com senha
+protegida), a solução exige um backend/servidor real, o que muda a
+arquitetura "100% GitHub Pages" descrita aqui.
 
 ### Limitações desse modelo (comparado ao app Flask local)
 
