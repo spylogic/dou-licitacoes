@@ -1,5 +1,14 @@
 [
   {
+    "data_iso": "2026-10-22",
+    "data": "22/10/2026",
+    "so_licitacao": false,
+    "total": 2180,
+    "arquivo_json": "2026-10-22.json",
+    "arquivo_xlsx": "2026-10-22.xlsx",
+    "gerado_em": "2026-10-22T17:03:09.847431+00:00"
+  },
+  {
     "data_iso": "2026-10-21",
     "data": "21/10/2026",
     "so_licitacao": false,
